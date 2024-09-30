@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magasin de Chaussures</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Magasin de Chaussures</h1>
+
+    <h2>Ajouter un Modèle</h2>
+    <input type="text" id="model" placeholder="Nom du modèle">
+    <input type="text" id="id_marque" placeholder="ID de la marque">
+    <input type="text" id="pointure" placeholder="Pointure">
+    <input type="text" id="textphoto" placeholder="URL de la photo">
+    <input type="text" id="couleur" placeholder="Couleur">
+    <button id="add-model">Ajouter Modèle</button>
+
+    <br>
+    
+    <button id="showMarques">Afficher toutes les marques</button>
+    <button id="showPointures">Afficher toutes les pointures</button>
+    <button id="showModels">Afficher tous les modèles</button>
+
+    <h2>Recherche</h2>
+    <input type="text" id="searchInput" placeholder="Rechercher un modèle, une marque ou une pointure">
+    <button id="searchButton">Rechercher</button>
+
+    <br>
+    <h2>Modifier un Modèle</h2>
+    <input type="text" id="modifyId" placeholder="ID du modèle à modifier">
+    <input type="text" id="newModel" placeholder="Nouveau nom du modèle">
+    <input type="text" id="newIdMarque" placeholder="Nouvel ID de la marque">
+    <input type="text" id="newPointure" placeholder="Nouvelle pointure">
+    <input type="text" id="newTextPhoto" placeholder="Nouvelle URL de la photo">
+    <input type="text" id="newCouleur" placeholder="Nouvelle couleur">
+    <button id="modify-model">Modifier le modèle</button>
+
+    <br>
+
+    <h2>Ajouter une Marque</h2>
+    <input type="text" id="newMarque" placeholder="Nom de la nouvelle marque">
+    <button id="add-marque">Ajouter Marque</button> <br>
+
+    <h2>Ajouter une Pointure</h2>
+    <input type="text" id="newPointureInput" placeholder="Nouvelle pointure">
+    <button id="add-pointure">Ajouter Pointure</button> <br>
+
+
+    <button id="delete-all-models">Supprimer tous les modèles</button>
+    <button id="delete-all-marques">Supprimer toutes les marques</button>
+    <button id="delete-all-pointures">Supprimer toutes les pointures</button>
+
+    <h2>Supprimer un modèle spécifique</h2>
+    <input type="text" id="modelId" placeholder="ID du modèle à supprimer">
+    <button id="delete-model">Supprimer le modèle</button>
+
+    <div id="results"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#showMarques').click(function() {
+                $.get('/api/marques', function(data) {
+                    $('#results').html(JSON.stringify(data));
+                });
+            });
+
+            $('#showPointures').click(function() {
+                $.get('/api/pointures', function(data) {
+                    $('#results').html(JSON.stringify(data));
+                });
+            });
+
+            $('#showModels').click(function() {
+                $.get('/api/models', function(data) {
+                    $('#results').html(JSON.stringify(data));
+                });
+            });
+
+            $('#searchButton').click(function() {
+                const query = $('#searchInput').val();
+                $.get(`/api/search?query=${query}`, function(data) {
+                    $('#results').html(JSON.stringify(data));
+                });
+            });
+
+            $('#delete-all-models').click(function() {
+                $.ajax({
+                    url: '/api/models',
+                    type: 'DELETE',
+                    success: function(data) {
+                        alert(data.message);
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+            // Supprimer toutes les marques
+            $('#delete-all-marques').click(function() {
+                $.ajax({
+                    url: '/api/marques',
+                    type: 'DELETE',
+                    success: function(data) {
+                        alert(data.message);
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+            // Supprimer toutes les pointures
+            $('#delete-all-pointures').click(function() {
+                $.ajax({
+                    url: '/api/pointures',
+                    type: 'DELETE',
+                    success: function(data) {
+                        alert(data.message);
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+            // Supprimer un modèle spécifique
+            $('#delete-model').click(function() {
+                const modelId = $('#modelId').val();
+                $.ajax({
+                    url: `/api/models/${modelId}`,
+                    type: 'DELETE',
+                    success: function(data) {
+                        alert(data.message);
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+              // Ajouter un modèle
+              $('#add-model').click(function() {
+                const model = $('#model').val();
+                const id_marque = $('#id_marque').val();
+                const pointure = $('#pointure').val();
+                const textphoto = $('#textphoto').val();
+                const couleur = $('#couleur').val();
+
+                $.ajax({
+                    url: '/api/models',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ model, id_marque, pointure, textphoto, couleur }),
+                    success: function(data) {
+                        alert(data.message);
+                     $('#model').val('');
+                     $('#id_marque').val('');
+                     $('#pointure').val('');
+                     $('#textphoto').val('');
+                     $('#couleur').val('');
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+            // Modifier un modèle
+            $('#modify-model').click(function() {
+                const modelId = $('#modifyId').val();
+                const newModel = $('#newModel').val();
+                const newIdMarque = $('#newIdMarque').val();
+                const newPointure = $('#newPointure').val();
+                const newTextPhoto = $('#newTextPhoto').val();
+                const newCouleur = $('#newCouleur').val();
+
+                $.ajax({
+                    url: `/api/models/${modelId}`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ model: newModel, id_marque: newIdMarque, pointure: newPointure, textphoto: newTextPhoto, couleur: newCouleur }),
+                    success: function(data) {
+                        alert(data.message);
+                        $('#modifyId').val('');
+                    $('#newModel').val('');
+                    $('#newIdMarque').val('');
+                    $('#newPointure').val('');
+                    $('#newTextPhoto').val('');
+                    $('#newCouleur').val('');
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+               // Ajouter une marque
+               $('#add-marque').click(function() {
+                const marque = $('#newMarque').val();
+                $.ajax({
+                    url: '/api/marques',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ marque }),
+                    success: function(data) {
+                        alert(data.message);
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+            // Ajouter une pointure
+            $('#add-pointure').click(function() {
+                const pointure = $('#newPointureInput').val();
+                $.ajax({
+                    url: '/api/pointures',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ pointure }),
+                    success: function(data) {
+                        alert(data.message);
+                    },
+                    error: function(err) {
+                        alert('Erreur: ' + err.responseJSON.error);
+                    }
+                });
+            });
+
+
+
+        
+        });
+    </script>
+</body>
+</html>
